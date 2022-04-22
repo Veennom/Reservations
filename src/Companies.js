@@ -5,6 +5,7 @@ import * as db from "./db";
 import { format, parseISO } from "date-fns";
 import * as moment from "moment";
 const { v4: uuidv4 } = require("uuid");
+//line 7 wrong library
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);
@@ -28,6 +29,7 @@ const Companies = () => {
           companyId: company.id,
           state: "enabled",
           slotId: Math.random().toString().substr(2),
+          //32 it is not neccesary
         };
       });
       return companySlots;
@@ -36,6 +38,7 @@ const Companies = () => {
     const mergedSlots = [].concat(...allSlots);
     setSlotsState(mergedSlots);
   }, [companies]);
+  // 37-39 Check-Again
 
   useEffect(() => {
     const companiesFormatted = companies.map((company) => {
@@ -70,11 +73,14 @@ const Companies = () => {
           ...element,
         });
       });
+      // 64-75 find a new way (maybe a regular for-loop)
+
       const sortedByDate = Object.entries(GroupedByDayObj).sort(function (
         a,
         b
       ) {
         return new Date(a[0]) - new Date(b[0]);
+        //80 uneccesary
       });
 
       const joinedSortedArray = sortedByDate.map((el) => {
@@ -92,6 +98,7 @@ const Companies = () => {
     });
     setCompaniesFormatted(groupedByDayArray);
   }, [slotsState]);
+  // 100
 
   useEffect(() => {
     const slotIds = reservations.map((el) => el.slotId);
@@ -104,7 +111,9 @@ const Companies = () => {
             (element.end_time.toString() <= reservation.end_time.toString() &&
               element.end_time.toString() >
               reservation.start_time.toString())) &&
-          reservation.selectedDay == element.day
+          reservation.selectedDay === element.day
+        // 1 == '1' = true // converts data type
+        // 1 === '1' = false // compares datas
       );
       if (booleanReservation && !slotIds.includes(element.slotId)) {
         return {
@@ -123,6 +132,7 @@ const Companies = () => {
         };
       }
     });
+    // 105-132 utility service class (create a method)
     setSlotsState(touchedSlots);
   }, [reservations]);
 
