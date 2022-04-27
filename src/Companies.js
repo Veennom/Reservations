@@ -4,7 +4,7 @@ import "./style.css";
 import * as db from "./db";
 import { format, parseISO } from "date-fns";
 import * as moment from "moment";
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 //line 7 wrong library
 
 const Companies = () => {
@@ -12,12 +12,17 @@ const Companies = () => {
   const [companiesFormatted, setCompaniesFormatted] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [slotsState, setSlotsState] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
 
   useEffect(() => {
     let companies = db.Companies;
     setCompanies(companies);
-  }, []);
 
+  }, []);
+  // const state = slotsState.map((slot) => {
+  // console.log('SLOTSTATE', slot.state)
+  // })
+  console.log('test', selectedState)
   useEffect(() => {
     const allSlots = companies.map((company) => {
       const companySlots = company.time_slots.map((slot) => {
@@ -59,6 +64,7 @@ const Companies = () => {
       return {
         company: company.name,
         slots,
+        companyId: company.id
       };
     });
     const groupedByDayArray = formatedDate.map((company) => {
@@ -94,6 +100,7 @@ const Companies = () => {
       return {
         days: joinedSortedArray,
         companyName: company.company,
+        companyId: company.companyId
       };
     });
     setCompaniesFormatted(groupedByDayArray);
@@ -121,6 +128,8 @@ const Companies = () => {
           state: "disabled",
         };
       } else if (slotIds.includes(element.slotId)) {
+        setSelectedState(element.start_time + '-' + element.end_time)
+        console.log(element, 'element')
         return {
           ...element,
           state: "reserved",
@@ -173,6 +182,8 @@ const Companies = () => {
           data={company}
           handleClick={handleClick}
           key={company.companyName}
+          selected={selectedState}
+          reservations={reservations}
         />
       ))}
     </div>
