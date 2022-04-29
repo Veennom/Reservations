@@ -1,16 +1,24 @@
-import React, { useState, useEffect } from "react";
+import * as React from "react";
 import Company from "./Company";
 import "./style.css";
 import * as db from "./db";
 import { format, parseISO } from "date-fns";
 import * as moment from "moment";
-// const { v4: uuidv4 } = require("uuid");
-//line 7 wrong library
+import { useEffect, useState } from "react";
+import { styled } from "@mui/material";
+
+const Container = styled('div')({
+  margin: '0 auto',
+  display: 'flex',
+  justifyContent: 'space-around',
+  maxWidth: '700px',
+  paddingTop: '50px'
+});
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);
   const [companiesFormatted, setCompaniesFormatted] = useState([]);
-  const [reservations, setReservations] = useState([]);
+  const [reservations, setReservations] = useState<any>([]);
   const [slotsState, setSlotsState] = useState([]);
   const [selectedState, setSelectedState] = useState('');
 
@@ -19,13 +27,11 @@ const Companies = () => {
     setCompanies(companies);
 
   }, []);
-  // const state = slotsState.map((slot) => {
-  // console.log('SLOTSTATE', slot.state)
-  // })
+
   console.log('test', selectedState)
   useEffect(() => {
     const allSlots = companies.map((company) => {
-      const companySlots = company.time_slots.map((slot) => {
+      return company.time_slots.map((slot: { start_time: string; end_time: string; }) => {
         return {
           ...slot,
           start_time: format(parseISO(slot.start_time), "HH:mm"),
@@ -37,7 +43,6 @@ const Companies = () => {
           //32 it is not neccesary
         };
       });
-      return companySlots;
     });
 
     const mergedSlots = [].concat(...allSlots);
@@ -56,7 +61,7 @@ const Companies = () => {
       };
     });
     const formatedDate = companiesFormatted.map((company) => {
-      const slots = company.time_slots.map((slot) => {
+      const slots = company.time_slots.map((slot: any) => {
         return {
           ...slot,
         };
@@ -70,8 +75,9 @@ const Companies = () => {
     const groupedByDayArray = formatedDate.map((company) => {
       const GroupedByDayObj = {};
 
-      company.slots.forEach((element) => {
+      company.slots.forEach((element: { day: any; }) => {
         let dayKey = element.day;
+        // console.log(typeof dayKey)
         if (!GroupedByDayObj[dayKey]) {
           GroupedByDayObj[dayKey] = [];
         }
@@ -79,13 +85,11 @@ const Companies = () => {
           ...element,
         });
       });
-      // 64-75 find a new way (maybe a regular for-loop)
-
       const sortedByDate = Object.entries(GroupedByDayObj).sort(function (
         a,
         b
       ) {
-        return new Date(a[0]) - new Date(b[0]);
+        return new Date(a[0]).valueOf() - new Date(b[0]).valueOf();
         //80 uneccesary
       });
 
@@ -108,10 +112,10 @@ const Companies = () => {
   // 100
 
   useEffect(() => {
-    const slotIds = reservations.map((el) => el.slotId);
+    const slotIds = reservations.map((el: { slotId: any; }) => el.slotId);
     const touchedSlots = slotsState.map((element) => {
       const booleanReservation = reservations.some(
-        (reservation) =>
+        (reservation: { start_time: { toString: () => number; }; end_time: { toString: () => number; }; selectedDay: any; }) =>
           ((element.start_time.toString() >=
             reservation.start_time.toString() &&
             element.start_time.toString() < reservation.end_time.toString()) ||
@@ -146,16 +150,16 @@ const Companies = () => {
   }, [reservations]);
 
   const handleClick = (
-    start_time,
-    end_time,
-    selectedDay,
-    companyId,
-    slotId
+    start_time: any,
+    end_time: any,
+    selectedDay: { toString: () => any; },
+    companyId: any,
+    slotId: any
   ) => {
     if (
       reservations.length === 0 ||
       !reservations.some(
-        (el) =>
+        (el: { selectedDay: any; companyId: any; }) =>
           el.selectedDay === selectedDay.toString() &&
           el.companyId === companyId
       )
@@ -170,13 +174,13 @@ const Companies = () => {
           slotId,
         },
       ]);
-    } else if (reservations.some((el) => el.slotId === slotId)) {
-      const filteredSlots = reservations.filter((el) => el.slotId !== slotId);
+    } else if (reservations.some((el: { slotId: any; }) => el.slotId === slotId)) {
+      const filteredSlots = reservations.filter((el: { slotId: any; }) => el.slotId !== slotId);
       setReservations(filteredSlots);
     }
   };
   return (
-    <div className="companiesContainer">
+    <Container>
       {companiesFormatted.map((company) => (
         <Company
           data={company}
@@ -186,7 +190,7 @@ const Companies = () => {
           reservations={reservations}
         />
       ))}
-    </div>
+    </Container>
   );
 };
 
